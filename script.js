@@ -5,6 +5,7 @@ class LaneRunner {
         this.scoreElement = document.getElementById('score');
         this.gameOverElement = document.getElementById('gameOver');
         this.finalScoreElement = document.getElementById('finalScore');
+        this.countdownElement = document.getElementById('countdownText');
         this.restartBtn = document.getElementById('restartBtn');
         
         // Set up responsive canvas
@@ -151,6 +152,15 @@ class LaneRunner {
         
         if (this.gameState === 'gameOver') {
             this.autoRestartTimer++;
+            
+            // Update countdown display
+            const secondsLeft = Math.ceil((this.autoRestartDelay - this.autoRestartTimer) / 60);
+            if (secondsLeft > 0) {
+                this.countdownElement.textContent = `Auto-restarting in ${secondsLeft}...`;
+            } else {
+                this.countdownElement.textContent = 'Restarting now!';
+            }
+            
             if (this.autoRestartTimer >= this.autoRestartDelay) {
                 this.restart();
             }
@@ -207,9 +217,9 @@ class LaneRunner {
         const lane = Math.floor(Math.random() * this.lanes);
         const obstacle = {
             x: lane * this.laneWidth + this.laneWidth / 2,
-            y: -80,
+            y: -100,
             width: 140,
-            height: 70,
+            height: 100,
             lane: lane
         };
         this.obstacles.push(obstacle);
@@ -263,9 +273,24 @@ class LaneRunner {
         const bounce = Math.sin(this.animationTime * 0.1) * 2;
         const adjustedY = y + bounce;
         
-        // Simple green rectangle for player
-        this.ctx.fillStyle = '#00AA00';
-        this.ctx.fillRect(x, adjustedY, this.player.width, this.player.height);
+        // Blue character with details
+        // Main body (blue)
+        this.ctx.fillStyle = '#4488CC';
+        this.ctx.fillRect(x + this.player.width * 0.2, adjustedY + this.player.height * 0.3, this.player.width * 0.6, this.player.height * 0.5);
+        
+        // Head (lighter blue)
+        this.ctx.fillStyle = '#6699DD';
+        this.ctx.fillRect(x + this.player.width * 0.3, adjustedY + this.player.height * 0.1, this.player.width * 0.4, this.player.height * 0.25);
+        
+        // Arms (blue)
+        this.ctx.fillStyle = '#4488CC';
+        this.ctx.fillRect(x + this.player.width * 0.1, adjustedY + this.player.height * 0.35, this.player.width * 0.15, this.player.height * 0.3);
+        this.ctx.fillRect(x + this.player.width * 0.75, adjustedY + this.player.height * 0.35, this.player.width * 0.15, this.player.height * 0.3);
+        
+        // Legs (blue)
+        this.ctx.fillStyle = '#4488CC';
+        this.ctx.fillRect(x + this.player.width * 0.3, adjustedY + this.player.height * 0.75, this.player.width * 0.15, this.player.height * 0.25);
+        this.ctx.fillRect(x + this.player.width * 0.55, adjustedY + this.player.height * 0.75, this.player.width * 0.15, this.player.height * 0.25);
     }
     
     drawObstacle(obstacle) {
@@ -276,14 +301,33 @@ class LaneRunner {
         const wobble = Math.sin((this.animationTime + obstacle.y) * 0.2) * 0.5;
         const adjustedX = x + wobble;
         
-        // Simple red rectangle for obstacle
-        this.ctx.fillStyle = '#CC0000';
+        // Detailed car with muted red colors
+        // Main body (muted red)
+        this.ctx.fillStyle = '#AA4444';
         this.ctx.fillRect(adjustedX, y, obstacle.width, obstacle.height);
+        
+        // Front section (darker red)
+        this.ctx.fillStyle = '#884444';
+        this.ctx.fillRect(adjustedX, y, obstacle.width, obstacle.height * 0.3);
+        
+        // Windshield (dark gray)
+        this.ctx.fillStyle = '#333333';
+        this.ctx.fillRect(adjustedX + obstacle.width * 0.1, y + obstacle.height * 0.05, obstacle.width * 0.8, obstacle.height * 0.2);
+        
+        // Side windows (dark gray)
+        this.ctx.fillStyle = '#444444';
+        this.ctx.fillRect(adjustedX + obstacle.width * 0.05, y + obstacle.height * 0.35, obstacle.width * 0.2, obstacle.height * 0.3);
+        this.ctx.fillRect(adjustedX + obstacle.width * 0.75, y + obstacle.height * 0.35, obstacle.width * 0.2, obstacle.height * 0.3);
+        
+        // Rear section (medium red)
+        this.ctx.fillStyle = '#996666';
+        this.ctx.fillRect(adjustedX, y + obstacle.height * 0.7, obstacle.width, obstacle.height * 0.3);
     }
     
     gameOver() {
         this.gameState = 'gameOver';
         this.finalScoreElement.textContent = this.score;
+        this.countdownElement.textContent = 'Auto-restarting in 3...';
         this.gameOverElement.style.display = 'block';
     }
     

@@ -61,19 +61,18 @@ body {
 }
 
 .score {
-    background: rgba(0, 0, 0, 0.9);
-    color: #00AAFF;
+    background: rgba(0, 0, 0, 0.8);
+    color: #CCCCCC;
     padding: 15px 20px;
     border-radius: 10px;
     font-size: 24px;
     font-weight: bold;
-    border: 3px solid #00AAFF;
-    box-shadow: 0 0 15px rgba(0, 170, 255, 0.3);
+    border: 2px solid #777777;
 }
 
 .score::before {
     content: "POINTS: ";
-    color: #FFFFFF;
+    color: #AAAAAA;
     font-size: 16px;
     display: block;
     margin-bottom: 5px;
