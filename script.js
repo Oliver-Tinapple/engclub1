@@ -66,6 +66,17 @@ class LaneRunner {
         this.lanes = 3;
         this.laneWidth = this.canvas.width / this.lanes;
         
+        // Initialize or update player position
+        if (!this.player) {
+            this.player = {
+                x: 0,
+                y: 0,
+                width: 120,
+                height: 60,
+                targetX: 0
+            };
+        }
+        
         // Update player position to stay at bottom (accounting for fade area)
         this.player.x = this.currentLane * this.laneWidth + this.laneWidth / 2;
         this.player.y = this.canvas.height - 150; // Higher up to avoid bottom fade
@@ -252,23 +263,9 @@ class LaneRunner {
         const bounce = Math.sin(this.animationTime * 0.1) * 2;
         const adjustedY = y + bounce;
         
-        // Player body (bright blue for subway surfers style)
-        this.ctx.fillStyle = '#00AAFF';
-        this.ctx.fillRect(x + this.player.width * 0.15, adjustedY + this.player.height * 0.35, this.player.width * 0.7, this.player.height * 0.6);
-        
-        // Player head (lighter blue)
-        this.ctx.fillStyle = '#44CCFF';
-        this.ctx.fillRect(x + this.player.width * 0.25, adjustedY + this.player.height * 0.1, this.player.width * 0.5, this.player.height * 0.3);
-        
-        // Arms with slight sway (bright blue)
-        const armSway = Math.sin(this.animationTime * 0.15) * 1;
-        this.ctx.fillStyle = '#00AAFF';
-        this.ctx.fillRect(x + this.player.width * 0.05 + armSway, adjustedY + this.player.height * 0.4, this.player.width * 0.2, this.player.height * 0.4);
-        this.ctx.fillRect(x + this.player.width * 0.75 - armSway, adjustedY + this.player.height * 0.4, this.player.width * 0.2, this.player.height * 0.4);
-        
-        // Legs (bright blue)
-        this.ctx.fillRect(x + this.player.width * 0.25, adjustedY + this.player.height * 0.85, this.player.width * 0.2, this.player.height * 0.15);
-        this.ctx.fillRect(x + this.player.width * 0.55, adjustedY + this.player.height * 0.85, this.player.width * 0.2, this.player.height * 0.15);
+        // Simple green rectangle for player
+        this.ctx.fillStyle = '#00AA00';
+        this.ctx.fillRect(x, adjustedY, this.player.width, this.player.height);
     }
     
     drawObstacle(obstacle) {
@@ -279,23 +276,9 @@ class LaneRunner {
         const wobble = Math.sin((this.animationTime + obstacle.y) * 0.2) * 0.5;
         const adjustedX = x + wobble;
         
-        // Main body (bright orange for subway surfers style)
-        this.ctx.fillStyle = '#FF6600';
+        // Simple red rectangle for obstacle
+        this.ctx.fillStyle = '#CC0000';
         this.ctx.fillRect(adjustedX, y, obstacle.width, obstacle.height);
-        
-        // Top section (darker orange)
-        this.ctx.fillStyle = '#CC4400';
-        this.ctx.fillRect(adjustedX, y, obstacle.width, 20);
-        
-        // Side details (bright yellow) with gentle pulse effect
-        const pulse = Math.sin(this.animationTime * 0.2) * 0.3 + 0.7;
-        this.ctx.fillStyle = `rgba(255, 255, 0, ${pulse})`;
-        this.ctx.fillRect(adjustedX + 8, y + 25, 12, 50);
-        this.ctx.fillRect(adjustedX + obstacle.width - 20, y + 25, 12, 50);
-        
-        // Bottom section (dark orange)
-        this.ctx.fillStyle = '#994400';
-        this.ctx.fillRect(adjustedX, y + obstacle.height - 20, obstacle.width, 20);
     }
     
     gameOver() {

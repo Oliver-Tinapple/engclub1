@@ -1,0 +1,19 @@
+{
+  "name": "lane-runner-game",
+  "version": "1.0.0",
+  "description": "Accessible lane runner game for MAKERS of Change Challenge",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo 'No build required for static site'"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "devDependencies": {
+    "serve": "^14.0.0"
+  },
+  "keywords": ["game", "accessibility", "esp32", "lane-runner"],
+  "author": "Oliver Tinapple",
+  "license": "MIT"
+}
