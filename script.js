@@ -85,7 +85,7 @@ class LaneRunner {
         
         // Update player position to stay at bottom (accounting for fade area)
         this.player.x = this.currentLane * this.laneWidth + this.laneWidth / 2;
-        this.player.y = this.canvas.height - 150; // Higher up to avoid bottom fade
+        this.player.y = this.canvas.height - 120; // Positioned above light fade
         this.player.targetX = this.currentLane * this.laneWidth + this.laneWidth / 2;
     }
     
@@ -191,7 +191,7 @@ class LaneRunner {
         this.player.x += (this.player.targetX - this.player.x) * 0.2;
         
         // Keep player at bottom of screen (in case of resize)
-        this.player.y = this.canvas.height - 150;
+        this.player.y = this.canvas.height - 120;
         
         // Spawn obstacles
         this.obstacleSpawnTimer++;
@@ -372,7 +372,7 @@ class LaneRunner {
         this.speed = 2;
         this.currentLane = Math.floor(this.lanes / 2);
         this.player.x = this.currentLane * this.laneWidth + this.laneWidth / 2;
-        this.player.y = this.canvas.height - 150; // Ensure player stays at bottom
+        this.player.y = this.canvas.height - 120; // Ensure player stays at bottom
         this.player.targetX = this.player.x;
         this.obstacles = [];
         this.obstacleSpawnTimer = 0;
