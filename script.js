@@ -7,6 +7,8 @@ class LaneRunner {
         this.finalScoreElement = document.getElementById('finalScore');
         this.countdownElement = document.getElementById('countdownText');
         this.restartBtn = document.getElementById('restartBtn');
+        this.toggleAutoRestartBtn = document.getElementById('toggleAutoRestart');
+        this.highScoreElement = document.getElementById('highScore');
         
         // Set up responsive canvas
         this.setupCanvas();
@@ -15,6 +17,8 @@ class LaneRunner {
         this.gameState = 'playing'; // 'playing' or 'gameOver'
         this.score = 0;
         this.speed = 2;
+        this.autoRestart = true;
+        this.highScore = parseInt(localStorage.getItem('laneRunnerHighScore') || '0');
         
         // Animation variables
         this.animationTime = 0;
@@ -55,6 +59,7 @@ class LaneRunner {
         };
         
         this.setupInputHandlers();
+        this.updateHighScoreDisplay();
         this.gameLoop();
     }
     
@@ -110,6 +115,15 @@ class LaneRunner {
         this.restartBtn.addEventListener('click', () => {
             this.restart();
         });
+        
+        // Toggle auto restart button
+        this.toggleAutoRestartBtn.addEventListener('click', () => {
+            this.autoRestart = !this.autoRestart;
+            this.updateAutoRestartButton();
+            if (!this.autoRestart && this.gameState === 'gameOver') {
+                this.countdownElement.textContent = 'Click Restart to play again';
+            }
+        });
     }
     
     handleInput() {
@@ -151,18 +165,20 @@ class LaneRunner {
         this.animationTime++;
         
         if (this.gameState === 'gameOver') {
-            this.autoRestartTimer++;
-            
-            // Update countdown display
-            const secondsLeft = Math.ceil((this.autoRestartDelay - this.autoRestartTimer) / 60);
-            if (secondsLeft > 0) {
-                this.countdownElement.textContent = `Auto-restarting in ${secondsLeft}...`;
-            } else {
-                this.countdownElement.textContent = 'Restarting now!';
-            }
-            
-            if (this.autoRestartTimer >= this.autoRestartDelay) {
-                this.restart();
+            if (this.autoRestart) {
+                this.autoRestartTimer++;
+                
+                // Update countdown display
+                const secondsLeft = Math.ceil((this.autoRestartDelay - this.autoRestartTimer) / 60);
+                if (secondsLeft > 0) {
+                    this.countdownElement.textContent = `Auto-restarting in ${secondsLeft}...`;
+                } else {
+                    this.countdownElement.textContent = 'Restarting now!';
+                }
+                
+                if (this.autoRestartTimer >= this.autoRestartDelay) {
+                    this.restart();
+                }
             }
             return;
         }
@@ -217,9 +233,9 @@ class LaneRunner {
         const lane = Math.floor(Math.random() * this.lanes);
         const obstacle = {
             x: lane * this.laneWidth + this.laneWidth / 2,
-            y: -100,
-            width: 140,
-            height: 100,
+            y: -120,
+            width: 80,
+            height: 160,
             lane: lane
         };
         this.obstacles.push(obstacle);
@@ -240,13 +256,13 @@ class LaneRunner {
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw animated lane lines (brighter and thicker for better visibility)
-        this.ctx.strokeStyle = '#FFFFFF';
-        this.ctx.lineWidth = 4;
+        // Draw animated lane lines (yellow like real road markings)
+        this.ctx.strokeStyle = '#FFDD00';
+        this.ctx.lineWidth = 6;
         for (let i = 1; i < this.lanes; i++) {
             const x = i * this.laneWidth;
-            const dashOffset = (this.animationTime * this.speed) % 60;
-            this.ctx.setLineDash([30, 30]);
+            const dashOffset = (this.animationTime * this.speed) % 80;
+            this.ctx.setLineDash([40, 40]);
             this.ctx.lineDashOffset = -dashOffset;
             this.ctx.beginPath();
             this.ctx.moveTo(x, 0);
@@ -301,33 +317,52 @@ class LaneRunner {
         const wobble = Math.sin((this.animationTime + obstacle.y) * 0.2) * 0.5;
         const adjustedX = x + wobble;
         
-        // Detailed car with muted red colors
+        // Top-down car view with muted red colors
         // Main body (muted red)
         this.ctx.fillStyle = '#AA4444';
         this.ctx.fillRect(adjustedX, y, obstacle.width, obstacle.height);
         
-        // Front section (darker red)
+        // Front bumper (darker red)
         this.ctx.fillStyle = '#884444';
-        this.ctx.fillRect(adjustedX, y, obstacle.width, obstacle.height * 0.3);
+        this.ctx.fillRect(adjustedX, y, obstacle.width, obstacle.height * 0.15);
+        
+        // Hood (medium red)
+        this.ctx.fillStyle = '#996666';
+        this.ctx.fillRect(adjustedX, y + obstacle.height * 0.15, obstacle.width, obstacle.height * 0.25);
         
         // Windshield (dark gray)
         this.ctx.fillStyle = '#333333';
-        this.ctx.fillRect(adjustedX + obstacle.width * 0.1, y + obstacle.height * 0.05, obstacle.width * 0.8, obstacle.height * 0.2);
+        this.ctx.fillRect(adjustedX + obstacle.width * 0.1, y + obstacle.height * 0.4, obstacle.width * 0.8, obstacle.height * 0.08);
         
-        // Side windows (dark gray)
-        this.ctx.fillStyle = '#444444';
-        this.ctx.fillRect(adjustedX + obstacle.width * 0.05, y + obstacle.height * 0.35, obstacle.width * 0.2, obstacle.height * 0.3);
-        this.ctx.fillRect(adjustedX + obstacle.width * 0.75, y + obstacle.height * 0.35, obstacle.width * 0.2, obstacle.height * 0.3);
+        // Roof (main red)
+        this.ctx.fillStyle = '#AA4444';
+        this.ctx.fillRect(adjustedX, y + obstacle.height * 0.48, obstacle.width, obstacle.height * 0.25);
         
-        // Rear section (medium red)
-        this.ctx.fillStyle = '#996666';
-        this.ctx.fillRect(adjustedX, y + obstacle.height * 0.7, obstacle.width, obstacle.height * 0.3);
+        // Rear windshield (dark gray)
+        this.ctx.fillStyle = '#333333';
+        this.ctx.fillRect(adjustedX + obstacle.width * 0.1, y + obstacle.height * 0.73, obstacle.width * 0.8, obstacle.height * 0.07);
+        
+        // Trunk/rear (darker red)
+        this.ctx.fillStyle = '#884444';
+        this.ctx.fillRect(adjustedX, y + obstacle.height * 0.8, obstacle.width, obstacle.height * 0.2);
     }
     
     gameOver() {
         this.gameState = 'gameOver';
         this.finalScoreElement.textContent = this.score;
-        this.countdownElement.textContent = 'Auto-restarting in 3...';
+        
+        // Check for high score
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('laneRunnerHighScore', this.highScore.toString());
+            this.updateHighScoreDisplay();
+        }
+        
+        if (this.autoRestart) {
+            this.countdownElement.textContent = 'Auto-restarting in 3...';
+        } else {
+            this.countdownElement.textContent = 'Click Restart to play again';
+        }
         this.gameOverElement.style.display = 'block';
     }
     
@@ -344,6 +379,14 @@ class LaneRunner {
         this.obstacleSpawnRate = 240;
         this.autoRestartTimer = 0;
         this.gameOverElement.style.display = 'none';
+    }
+    
+    updateHighScoreDisplay() {
+        this.highScoreElement.textContent = this.highScore;
+    }
+    
+    updateAutoRestartButton() {
+        this.toggleAutoRestartBtn.textContent = this.autoRestart ? 'Disable Auto-Restart' : 'Enable Auto-Restart';
     }
     
     gameLoop() {
