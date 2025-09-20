@@ -1,0 +1,85 @@
+ESP32 GAME CONTROLLERS – DESIGN BRIEF
+=====================================
+
+Overview
+--------
+We are building a pair of wearable game controllers using ESP32 boards and IMU (Inertial Measurement Unit) sensors. 
+These controllers will let a player move in a simplified lane-runner game (like Subway Surfers mixed with Beat Saber/Geometry Dash) 
+using arm movements instead of small handheld controllers. This makes the game accessible for users with motor challenges 
+while still being fun for siblings to play together.
+
+Core Hardware Components
+------------------------
+1. **ESP32 Dev Board**
+   - Provides microcontroller + WiFi + Bluetooth Low Energy (BLE).
+   - Small, cheap, and widely supported (Arduino + MicroPython support).
+
+2. **IMU Sensor (Accelerometer + Gyroscope)**
+   - Recommended: MPU-6050 (budget) or LSM6DS3 (higher accuracy, smaller size).
+   - Detects tilt (for lane changes), flicks (for jumps), and gestures (pause/clutch).
+
+3. **Power System**
+   - LiPo battery (500–1000 mAh) for each bracelet.
+   - TP4056 charging board (USB micro/USB-C) for safe recharging.
+   - Slide switch for power control.
+
+4. **Mounting / Enclosure**
+   - Soft wristband or forearm band with sewn-in pocket/3D printed pod.
+   - Wires protected, no sharp edges, lightweight (<70 g).
+
+5. **Optional Feedback**
+   - Small vibration motor for haptic feedback.
+   - LED indicator (steady light only, no flashing).
+
+Firmware Logic (ESP32)
+----------------------
+- Programmed using Arduino framework (C++) or MicroPython.
+- Poll IMU at ~50–100 Hz.
+- Apply smoothing (moving average) and dead zones to prevent jitter.
+- Detect gestures:
+  - Tilt left/right → lane switch.
+  - Quick flick upward (accel spike) → jump.
+  - Raise both arms (optional with 2 controllers) → pause/clutch gesture.
+- Package gesture/state into small BLE messages (e.g., "LANE:-1", "JUMP").
+- Send to host computer running the game.
+
+Game Integration
+----------------
+Option A: Web Bluetooth + p5.js game
+- ESP32 sends BLE packets directly to browser.
+- Browser decodes movement commands and controls the p5.js game.
+- Pros: Simple, runs on laptop/tablet without installs.
+- Cons: Browser BLE support can be finicky.
+
+Option B: Unity Game (C#)
+- ESP32 sends BLE data to Unity using a Bluetooth plugin.
+- Allows polished 3D graphics and music synchronization.
+- More development overhead, but closer to Subway Surfers look.
+
+Safety Considerations
+---------------------
+- Sessions limited to 1–2 minutes, then enforced cooldown.
+- No flashing lights; use muted visuals and optional vignette in software.
+- Adjustable thresholds so small unintended jerks don’t cause false triggers.
+- Straps must be soft, breathable, and easily removable.
+- Battery safely enclosed; charge port only accessible when removed from wrist.
+
+Bill of Materials (per controller, estimate)
+-------------------------------------------
+- ESP32 Dev Board .................. $10
+- IMU Sensor (MPU-6050) ............ $8
+- LiPo Battery + TP4056 Charger .... $15
+- Wristband / enclosure ............ $10
+- Misc (wires, connectors, tape) ... $7
+-------------------------------------------
+Total per controller: ~ $50
+Two controllers: ~ $100
+
+Next Steps
+----------
+1. Prototype single ESP32 + IMU wired over USB to laptop → test gesture detection.
+2. Add BLE communication to browser p5.js lane-runner game.
+3. Mount onto wristband, test with safe motions.
+4. Add haptic feedback + finalize enclosure.
+5. Prepare demo + documentation for Makers Challenge submission.
+

@@ -1,0 +1,141 @@
+ESP32 GAME CONTROLLERS – FULL TECH BRIEF
+========================================
+
+# 1. Hardware Layer
+- ESP32 Dev Board (microcontroller, BLE, WiFi).
+- IMU Sensor (MPU-6050 or LSM6DS3) via I2C (SDA/SCL).
+- LiPo battery (500–1000 mAh) + TP4056 charger.
+- Wristband / 3D printed enclosure (lightweight, safe).
+- Optional: vibration motor or LED for feedback.
+
+# 2. Firmware Layer (ESP32)
+- **IMU Driver**: read accel + gyro at ~50–100 Hz.
+- **Filtering**: moving average, dead zones, hysteresis.
+- **Gesture Detection**:
+  - Tilt left/right → lane change.
+  - Flick upward → jump.
+  - Both arms up → pause/clutch.
+- **Packet Builder**: JSON or string packets like {"cmd":"LANE","val":1}.
+- **BLE Server**: advertise a GATT service, notify client of packets.
+
+CODE LOCATION: ESP32 Arduino sketch
+- Libraries: Wire.h, Adafruit_MPU6050, ArduinoBLE (or NimBLE).
+- Functions: setup(), loop(), readIMU(), detectGestures(), sendBLE().
+
+# 3. Communication Layer
+- BLE Peripheral (ESP32) → Host (laptop/tablet).
+- Alternate: Serial over USB for debugging.
+
+CODE LOCATION:
+- ESP32: BLEServer callbacks, notifyCharacteristic->setValue().
+- Browser (p5.js): navigator.bluetooth.requestDevice().
+- Unity: Bluetooth plugin (C#).
+
+# 4. Game Engine Layer
+Option A: p5.js (Browser)
+- Uses Web Bluetooth API.
+- Reads JSON packets.
+- Maps commands to player movement.
+
+Option B: Unity (C#)
+- Reads BLE packets with plugin.
+- Maps to 3D lane-runner mechanics.
+
+CODE LOCATION:
+- p5.js sketch: preload(), setup(), draw(), keyPressed(), BLE handlers.
+- Unity: C# Update() loop, BLE receive thread, movement controller.
+
+# 5. Visuals + Audio Layer
+- Subway Surfers style lane-runner with simplified 3 lanes.
+- Geometry Dash style beat-synced spawns.
+- No flashing lights; muted colors + vignette.
+- Music: upbeat but not too fast; volume control.
+
+CODE LOCATION:
+- p5.js or Unity game loop: obstacle spawn, draw player, collisions.
+- Audio sync logic tied to frameCount or audio timing events.
+
+# 6. Safety Layer
+- Session timer: limit to 1–2 minutes.
+- Pause gesture: arms up.
+- Calibration: neutral pose at startup sets baseline tilt.
+- Configurable thresholds for motion detection.
+
+CODE LOCATION:
+- Firmware: calibration + thresholds.
+- Game: session timer, pause state.
+
+========================================
+ORDER OF OPERATIONS (DETAILED)
+========================================
+
+1. **Prototype hardware**
+   - Wire ESP32 + IMU via I2C.
+   - Power with USB for testing.
+
+2. **Basic firmware (ESP32)**
+   - Write Arduino sketch to read IMU data.
+   - Print accel/gyro values over Serial (USB).
+
+3. **Filtering + gestures**
+   - Add moving average + dead zone.
+   - Implement: tilt → lane change, flick → jump.
+   - Print "LANE:-1", "LANE:+1", "JUMP" to Serial.
+
+   Example snippet (pseudo-code):
+   ```cpp
+   if (tilt < -THRESH && lastLane != LEFT) {
+     sendCommand("LANE", -1);
+   }
+   if (accelSpike > FLICK_DELTA) {
+     sendCommand("JUMP", 0);
+   }
+   ```
+
+4. **BLE packet send**
+   - Replace Serial prints with BLE characteristic notifications.
+   - Packet: {"cmd":"LANE","val":1}.
+
+5. **Game test with Serial**
+   - Modify p5.js game to read from Serial (via Chrome Serial API).
+   - Simulate lane switching before BLE.
+
+6. **Game test with BLE**
+   - Implement Web Bluetooth in p5.js.
+   - Subscribe to ESP32 notifications.
+   - Map packets to player movement.
+
+7. **Visual + audio polish**
+   - Add obstacles, scoring, death screen, restart.
+   - Add music and beat-synced obstacle spawn.
+
+8. **Safety + UX features**
+   - Enforce session timer (firmware or game).
+   - Add pause gesture (arms up = PAUSE).
+   - Ensure visuals safe (no flashing).
+
+9. **Enclosure + wearability**
+   - Mount ESP32 + IMU + battery into wristband.
+   - Test comfort, weight, safety.
+
+10. **Demo + documentation**
+    - Record gameplay with controller in use.
+    - Prepare poster/video for competition.
+
+========================================
+END-TO-END DATA FLOW
+========================================
+
+[IMU Sensor] 
+   → raw accel/gyro 
+[ESP32 Firmware] 
+   → filter + gesture detection 
+   → BLE packets {"cmd":"LANE","val":1} 
+[Host (Browser or Unity)] 
+   → BLE receive handler 
+   → game logic (lane switch, jump) 
+[Visuals + Audio] 
+   → player sees/hears feedback 
+[Safety Controls] 
+   → session timer, pause, thresholds
+
