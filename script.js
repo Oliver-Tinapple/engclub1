@@ -85,7 +85,7 @@ class LaneRunner {
         
         // Update player position to stay at bottom (completely visible)
         this.player.x = this.currentLane * this.laneWidth + this.laneWidth / 2;
-        this.player.y = this.canvas.height - 150; // Positioned well above fade area
+        this.player.y = this.canvas.height - 200; // Positioned well above fade area
         this.player.targetX = this.currentLane * this.laneWidth + this.laneWidth / 2;
     }
     
@@ -191,7 +191,7 @@ class LaneRunner {
         this.player.x += (this.player.targetX - this.player.x) * 0.2;
         
         // Keep player at bottom of screen (completely visible)
-        this.player.y = this.canvas.height - 150;
+        this.player.y = this.canvas.height - 200;
         
         // Spawn obstacles
         this.obstacleSpawnTimer++;
@@ -261,8 +261,8 @@ class LaneRunner {
         this.ctx.lineWidth = 6;
         for (let i = 1; i < this.lanes; i++) {
             const x = i * this.laneWidth;
-            const dashOffset = (this.animationTime * this.speed) % 80;
-            this.ctx.setLineDash([40, 40]);
+            const dashOffset = (this.animationTime * this.speed) % 120;
+            this.ctx.setLineDash([60, 60]);
             this.ctx.lineDashOffset = -dashOffset;
             this.ctx.beginPath();
             this.ctx.moveTo(x, 0);
@@ -372,7 +372,7 @@ class LaneRunner {
         this.speed = 2;
         this.currentLane = Math.floor(this.lanes / 2);
         this.player.x = this.currentLane * this.laneWidth + this.laneWidth / 2;
-        this.player.y = this.canvas.height - 150; // Ensure player stays at bottom and is completely visible
+        this.player.y = this.canvas.height - 200; // Ensure player stays at bottom and is completely visible
         this.player.targetX = this.player.x;
         this.obstacles = [];
         this.obstacleSpawnTimer = 0;
